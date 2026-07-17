@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic-Tac-Toe AI - Unbeatable Minimax Agent with Search Visualizer</title>
+  <meta name="description" content="Play Tic-Tac-Toe against an unbeatable AI agent. Features Minimax with Alpha-Beta Pruning, real-time search visualization, and responsive glassmorphism UI.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-cyberpunk">
+  <div class="stars-overlay"></div>
+  <div class="cyber-grid-overlay"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <div class="title-group">
+          <h1>NEXUS TACTICS</h1>
+          <p class="subtitle">Unbeatable AI Agent &amp; Minimax Visualizer</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <button id="sound-toggle" class="control-btn icon-btn" title="Toggle Sound">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
+        <button id="theme-toggle" class="control-btn icon-btn" title="Toggle Theme">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="dashboard-grid">
+      <!-- Left Column: Controls & Scoreboard -->
+      <aside class="dashboard-column left-column">
+        <section class="card stats-card">
+          <h2 class="card-title">Scoreboard</h2>
+          <div class="stats-grid">
+            <div class="stat-box player-stat">
+              <span class="stat-label">Human (You)</span>
+              <span id="stat-human-score" class="stat-value">0</span>
+            </div>
+            <div class="stat-box draw-stat">
+              <span class="stat-label">Draws</span>
+              <span id="stat-draws-score" class="stat-value">0</span>
+            </div>
+            <div class="stat-box ai-stat">
+              <span class="stat-label">Nexus AI</span>
+              <span id="stat-ai-score" class="stat-value">0</span>
+            </div>
+          </div>
+          <button id="reset-stats-btn" class="secondary-btn">Reset Scoreboard</button>
+        </section>
+
+        <section class="card settings-card">
+          <h2 class="card-title">Configuration</h2>
+          
+          <div class="setting-group">
+            <label for="difficulty-select">Agent Difficulty</label>
+            <div class="custom-select-wrapper">
+              <select id="difficulty-select">
+                <option value="easy">Novice (Easy)</option>
+                <option value="medium">Challenger (Medium)</option>
+                <option value="unbeatable" selected>Nexus (Unbeatable)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>Choose Side</label>
+            <div class="side-selector">
+              <button id="play-side-x" class="side-btn active" data-side="X">
+                <span class="symbol-x">X</span> (First)
+              </button>
+              <button id="play-side-o" class="side-btn" data-side="O">
+                <span class="symbol-o">O</span> (Second)
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-group toggle-group">
+            <div class="toggle-container">
+              <label for="visualizer-toggle" class="toggle-label">
+                <span class="toggle-title">AI Mind Map</span>
+                <span class="toggle-subtitle">Display heuristic calculations &amp; minimax scores</span>
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="visualizer-toggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Center Column: Tic-Tac-Toe Grid & Turn Info -->
+      <section class="dashboard-column center-column">
+        <div class="turn-announcer" id="turn-announcer">
+          <span class="pulse-indicator glow-blue"></span>
+          <span id="turn-text">Your Turn (X)</span>
+        </div>
+
+        <div class="board-wrapper">
+          <div class="board" id="game-board">
+            <!-- 9 Cells generated via JS -->
+            <button class="cell" id="board-cell-0" data-index="0" aria-label="Square 1"></button>
+            <button class="cell" id="board-cell-1" data-index="1" aria-label="Square 2"></button>
+            <button class="cell" id="board-cell-2" data-index="2" aria-label="Square 3"></button>
+            <button class="cell" id="board-cell-3" data-index="3" aria-label="Square 4"></button>
+            <button class="cell" id="board-cell-4" data-index="4" aria-label="Square 5"></button>
+            <button class="cell" id="board-cell-5" data-index="5" aria-label="Square 6"></button>
+            <button class="cell" id="board-cell-6" data-index="6" aria-label="Square 7"></button>
+            <button class="cell" id="board-cell-7" data-index="7" aria-label="Square 8"></button>
+            <button class="cell" id="board-cell-8" data-index="8" aria-label="Square 9"></button>
+
+            <!-- Winning line overlay svg -->
+            <svg class="win-line-svg" id="win-line-svg" viewBox="0 0 300 300">
+              <line id="win-line" x1="0" y1="0" x2="0" y2="0" stroke="var(--primary-glow-color)" stroke-width="8" stroke-linecap="round" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="game-actions">
+          <button id="undo-btn" class="secondary-btn icon-text-btn" disabled>
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7v6h6"></path>
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+            </svg>
+            Undo Move
+          </button>
+          <button id="restart-btn" class="primary-btn icon-text-btn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+            Reboot Match
+          </button>
+        </div>
+      </section>
+
+      <!-- Right Column: AI Analytics & History -->
+      <aside class="dashboard-column right-column">
+        <section class="card visualizer-card">
+          <h2 class="card-title">AI Engine Status</h2>
+          
+          <div class="metrics-panel">
+            <div class="metric-row">
+              <span class="metric-name">States Visited</span>
+              <span id="metric-nodes" class="metric-value">0</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-name">Search Duration</span>
+              <span id="metric-time" class="metric-value">0.0 ms</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-name">Algorithm</span>
+              <span class="metric-value code-font">Minimax + α-β</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-name">Heuristic Value</span>
+              <span id="metric-heuristic" class="metric-value">-</span>
+            </div>
+          </div>
+
+          <div class="ai-thought-box">
+            <div class="radar-box">
+              <div class="radar-pulse"></div>
+              <div class="radar-line"></div>
+            </div>
+            <div class="thought-log" id="ai-thought-log">
+              Initializing... Nexus AI standing by.
+            </div>
+          </div>
+        </section>
+
+        <section class="card history-card">
+          <h2 class="card-title">Match History</h2>
+          <div class="table-container">
+            <table class="history-table" id="history-table">
+              <thead>
+                <tr>
+                  <th>Match</th>
+                  <th>Outcome</th>
+                  <th>Difficulty</th>
+                  <th>Moves</th>
+                </tr>
+              </thead>
+              <tbody id="history-body">
+                <!-- Injected via JS -->
+                <tr class="no-history">
+                  <td colspan="4">No battles logged yet</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="app-footer">
+      <p>Nexus Tactics AI &bull; Built with Minimax &amp; Alpha-Beta Pruning &bull; Google Fonts Outfit &amp; Plus Jakarta</p>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="minimax.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
